@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://apple.com"><img src="https://img.shields.io/badge/Platform-macOS%2013%2B-0f172a?style=flat-square&logo=apple&logoColor=white" alt="Platform"></a>
-  <a href="https://apple.com"><img src="https://img.shields.io/badge/Architecture-Apple%20Silicon%20(M1--M4)-334155?style=flat-square" alt="Hardware"></a>
+  <a href="https://apple.com"><img src="https://img.shields.io/badge/Architecture-Apple%20Silicon%20(M1--M5)-334155?style=flat-square" alt="Hardware"></a>
   <a href="https://github.com/ml-explore/mlx"><img src="https://img.shields.io/badge/Acoustics-Apple%20MLX%20Whisper-0284c7?style=flat-square" alt="Acoustics"></a>
   <a href="https://python.org"><img src="https://img.shields.io/badge/Standard%20Library-Zero%20Runtime%20Deps-10b981?style=flat-square" alt="Standard Library"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-64748b?style=flat-square" alt="License"></a>
@@ -53,6 +53,7 @@ The core text extraction and HTML compilation pipeline runs entirely on native P
 
 | Hardware Target | Audio Duration | Alignment Time | Throughput | Cloud API Cost |
 | :--- | :---: | :---: | :---: | :---: |
+| **Apple M5 / M5 Max (Next-Gen Unified Memory)** | 1 Hour (Studio Audio) | **~1.5 min** | **~40x Real-time** | **$0.00 (Offline)** |
 | **Apple M4 / M3 Max (Unified Memory)** | 1 Hour (Studio Audio) | **~2.2 min** | **~27x Real-time** | **$0.00 (Offline)** |
 | **Apple M3 / M2 Pro** | 1 Hour (Studio Audio) | **~3.5 min** | **~17x Real-time** | **$0.00 (Offline)** |
 | **Apple M1 / M2 Air** | 1 Hour (Studio Audio) | **~4.8 min** | **~12x Real-time** | **$0.00 (Offline)** |
