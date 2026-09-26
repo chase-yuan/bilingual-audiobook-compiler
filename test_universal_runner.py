@@ -185,6 +185,57 @@ class UniversalRunnerTests(unittest.TestCase):
             self.assertTrue(rep["release_ready"])
             self.assertEqual(rep["audio_content_mode"], "text_only")
 
+    def test_discover_audio_track_patterns(self):
+        from universal_runner import discover_audio_track
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_p = Path(tmp)
+            (tmp_p / "Track00_intro.mp3").write_bytes(b"mock")
+            (tmp_p / "chapter_01.m4a").write_bytes(b"mock")
+            (tmp_p / "ch02_middle.wav").write_bytes(b"mock")
+            (tmp_p / "03_finale.flac").write_bytes(b"mock")
+
+            self.assertEqual(discover_audio_track(tmp_p, 0).name, "Track00_intro.mp3")
+            self.assertEqual(discover_audio_track(tmp_p, 1).name, "chapter_01.m4a")
+            self.assertEqual(discover_audio_track(tmp_p, 2).name, "ch02_middle.wav")
+            self.assertEqual(discover_audio_track(tmp_p, 3).name, "03_finale.flac")
+            self.assertIsNone(discover_audio_track(tmp_p, 99))
+            self.assertIsNone(discover_audio_track(None, 0))
+
+    @patch("universal_runner.process_canonical_sentences")
+    def test_complete_audio_mode_copies_assets_and_sets_audio_src(self, mock_process_linguistics):
+        def fake_linguistics(canonical_data=None, *args, **kwargs):
+            return [
+                {"id": item["id"], "elem_idx": 0, "tag": "p", "text": item["text"], "trans": "译", "vocab": [], "is_heading": False}
+                for item in canonical_data
+            ]
+        mock_process_linguistics.side_effect = fake_linguistics
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            epub_path = root / "sample.epub"
+            book_dir = root / "output_book"
+            audio_dir = root / "audio_source"
+            audio_dir.mkdir()
+            (audio_dir / "chapter_00.mp3").write_bytes(b"ID3mockaudio")
+            (audio_dir / "chapter_01.mp3").write_bytes(b"ID3mockaudio")
+            (audio_dir / "chapter_02.mp3").write_bytes(b"ID3mockaudio")
+            _create_mock_epub(epub_path)
+
+            out_html = build_reader_pipeline(
+                epub_path=epub_path,
+                book_dir=book_dir,
+                audio_dir=audio_dir,
+                concurrency=2,
+                min_chars=50,
+                open_in_browser=False,
+            )
+
+            self.assertTrue(out_html.is_file())
+            # Verify audio files copied to target_dir / "audio"
+            self.assertTrue((book_dir / "audio" / "chapter_00.mp3").is_file())
+            self.assertTrue((book_dir / "audio" / "chapter_01.mp3").is_file())
+            html_text = out_html.read_text(encoding="utf-8")
+            self.assertIn("./audio/chapter_00.mp3", html_text)
+
 
 if __name__ == "__main__":
     unittest.main()

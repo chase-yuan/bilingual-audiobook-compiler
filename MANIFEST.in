@@ -1,0 +1,7 @@
+include LICENSE
+include README.md
+include README_EN.md
+include LINGUISTIC_ANALYSIS_PROMPT.md
+include failure_ledger.json
+recursive-include demo *
+recursive-include fixtures *

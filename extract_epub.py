@@ -6,8 +6,44 @@ Description: Unabridged 1-Sentence-1-Card EPUB Sentence Extractor with abbreviat
 import zipfile
 import re
 import json
+import urllib.parse
 from html.parser import HTMLParser
 from artifact_io import atomic_write_json
+
+
+def _read_zip_member(zf: zipfile.ZipFile, internal_path: str) -> str:
+    """Robustly read and decode HTML from EPUB archive with encoding and path fallbacks."""
+    candidates = [internal_path]
+    unquoted = urllib.parse.unquote(internal_path)
+    if unquoted not in candidates:
+        candidates.append(unquoted)
+
+    names = zf.namelist()
+    name_set = set(names)
+
+    target_name = None
+    for cand in candidates:
+        if cand in name_set:
+            target_name = cand
+            break
+
+    if not target_name:
+        norm_cand = unquoted.lower().replace("\\", "/")
+        for name in names:
+            if name.lower().replace("\\", "/") == norm_cand:
+                target_name = name
+                break
+
+    if not target_name:
+        raise KeyError(f"Member '{internal_path}' not found in EPUB archive")
+
+    raw_bytes = zf.read(target_name)
+    for enc in ("utf-8", "utf-8-sig", "latin-1", "cp1252"):
+        try:
+            return raw_bytes.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    return raw_bytes.decode("utf-8", errors="replace")
 
 ABBR_TITLES = [
     "Mr", "Mrs", "Ms", "Dr", "Prof", "Sr", "Jr", "Rev", "Hon", "Gen", "Col", "Maj", "Capt", "Lt", "Sgt", "Cpl", "Pvt",
@@ -86,8 +122,13 @@ class ChapterParser(HTMLParser):
         if tag == "img":
             return
 
-        if tag in ["h1", "h2", "h3", "h4", "p", "blockquote", "li"]:
+        if tag in ["h1", "h2", "h3", "h4", "h5", "h6", "p", "blockquote", "li", "dd", "dt"]:
             self.current_tag = tag
+            self.current_attrs = attrs_dict
+            self.current_text = []
+            self.recording = True
+        elif tag == "div" and any(w in cls for w in ["para", "p-", "text", "line", "calibre", "section", "block", "body"]):
+            self.current_tag = "p"
             self.current_attrs = attrs_dict
             self.current_text = []
             self.recording = True
@@ -119,7 +160,7 @@ class ChapterParser(HTMLParser):
 
 def extract_chapter_from_epub(epub_path, chapter_internal_path, out_json_path):
     with zipfile.ZipFile(epub_path, 'r') as z:
-        raw_html = z.read(chapter_internal_path).decode('utf-8')
+        raw_html = _read_zip_member(z, chapter_internal_path)
         
     parser = ChapterParser()
     parser.feed(raw_html)
@@ -151,6 +192,24 @@ def extract_chapter_from_epub(epub_path, chapter_internal_path, out_json_path):
                     "is_heading": False
                 })
                 s_idx += 1
+
+    if not canonical_items:
+        # Fallback for unconventional EPUBs where text is only in generic tags
+        clean_text = re.sub(r"<(script|style|svg)[^>]*>[\s\S]*?</\1>", "", raw_html, flags=re.IGNORECASE)
+        plain_text = re.sub(r"<[^>]+>", " ", clean_text)
+        plain_text = re.sub(r"\s+", " ", plain_text).strip()
+        if plain_text:
+            sents = split_into_atomic_sentences(plain_text)
+            for s in sents:
+                if s.strip():
+                    canonical_items.append({
+                        "id": f"s-{s_idx}",
+                        "elem_idx": 0,
+                        "tag": "p",
+                        "text": s.strip(),
+                        "is_heading": False
+                    })
+                    s_idx += 1
                 
     atomic_write_json(out_json_path, canonical_items)
         

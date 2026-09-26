@@ -87,8 +87,11 @@ def run_mlx_acoustic_extraction(
     atomic_write_json(output_json_path, output_data)
         
     elapsed = round(time.time() - start_t, 2)
-    print(f"Acoustic extraction complete in {elapsed}s! Total words extracted: {len(words_list)} -> {output_json_path}")
     return output_data
+
+
+transcribe_chapter_audio = run_mlx_acoustic_extraction
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 3:

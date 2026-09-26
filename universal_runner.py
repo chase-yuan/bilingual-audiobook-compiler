@@ -351,6 +351,95 @@ def synthesize_text_only_aligned_sentences(
     print("[Stage 3] Aligned sentences synthesized.")
 
 
+def discover_audio_track(audio_dir: Optional[Path], chapter_num: int, label: str = "") -> Optional[Path]:
+    """Flexibly resolve an audio file matching a chapter by number, pattern, or sequence."""
+    if not audio_dir or not audio_dir.is_dir():
+        return None
+    audio_exts = {".mp3", ".m4a", ".aac", ".wav", ".flac", ".ogg"}
+    files = [p for p in sorted(audio_dir.iterdir()) if p.suffix.lower() in audio_exts]
+    if not files:
+        return None
+
+    # Priority 1: Match chapter number with word boundaries
+    patterns = [
+        rf"(?<!\d)(?:chapter|ch|track)[ _-]*0*{chapter_num}(?!\d)",
+        rf"^0*{chapter_num}[ _\.\-]",
+        rf"(?<!\d)0*{chapter_num}(?!\d)",
+    ]
+    for pat in patterns:
+        for f in files:
+            if re.search(pat, f.stem, re.IGNORECASE):
+                return f
+
+    # Priority 2: Direct 0-indexed or 1-indexed mapping
+    if 0 <= chapter_num < len(files):
+        return files[chapter_num]
+
+    return None
+
+
+def run_audiobook_acoustic_and_alignment(
+    book_dir: Path,
+    chapters_meta: List[Dict[str, Any]],
+    prefix: str,
+    audio_dir: Path,
+) -> None:
+    print(f"\n=== [Stage 3: Forced Audio Alignment & Acoustic Synthesis] ===", flush=True)
+    from dynamic_aligner import align_sentences_with_audio
+
+    dest_audio_dir = book_dir / "audio"
+    dest_audio_dir.mkdir(parents=True, exist_ok=True)
+
+    tracks_with_acoustic = 0
+
+    for item in chapters_meta:
+        num = item["num"]
+        label = item["label"]
+        ana_path = book_dir / f"{prefix}_ch{num:02d}_full_analysis.json"
+        alg_path = book_dir / f"{prefix}_ch{num:02d}_aligned_sentences.json"
+        ac_path = book_dir / f"{prefix}_ch{num:02d}_acoustic_words.json"
+
+        audio_file = discover_audio_track(audio_dir, num, label)
+        if not audio_file or not audio_file.is_file():
+            print(f"[Audio Notice] Track {num:02d} ({label}) has no matching audio; synthesizing text alignment.", flush=True)
+            synthesize_text_only_aligned_sentences(book_dir, [item], prefix)
+            continue
+
+        target_audio_file = dest_audio_dir / audio_file.name
+        if not target_audio_file.exists():
+            shutil.copy2(audio_file, target_audio_file)
+            print(f"[Audio] Copied: {audio_file.name} -> {target_audio_file.name}", flush=True)
+
+        if not ac_path.is_file() or ac_path.stat().st_size < 100:
+            try:
+                from acoustic_whisper import transcribe_chapter_audio
+                print(f"[Acoustic] Transcribing track {num:02d} ({audio_file.name})...", flush=True)
+                transcribe_chapter_audio(str(target_audio_file), str(ac_path))
+            except Exception as exc:
+                print(f"[Acoustic Warning] Transcription skipped ({exc}); using text alignment fallback.", file=sys.stderr)
+
+        if ac_path.is_file() and ac_path.stat().st_size >= 100:
+            print(f"[Alignment] Aligning track {num:02d} with Dynamic Aligner...", flush=True)
+            try:
+                align_sentences_with_audio(str(ac_path), str(ana_path), str(alg_path))
+                tracks_with_acoustic += 1
+            except Exception as exc:
+                print(f"[Alignment Warning] Alignment failed ({exc}); falling back to text alignment.", file=sys.stderr)
+                synthesize_text_only_aligned_sentences(book_dir, [item], prefix)
+        else:
+            synthesize_text_only_aligned_sentences(book_dir, [item], prefix)
+
+    if tracks_with_acoustic < len(chapters_meta):
+        profile_path = book_dir / "audio_content_profile.json"
+        print(f"[Stage 3 Notice] Acoustic alignment available for {tracks_with_acoustic}/{len(chapters_meta)} tracks; setting release profile to text_only.", flush=True)
+        atomic_write_json(profile_path, {
+            "schema_version": 1,
+            "audio_content_mode": "text_only"
+        })
+
+    print("[Stage 3] Complete alignment phase finished.")
+
+
 def build_and_verify_reader(
     book_dir: Path,
     chapters_meta: List[Dict[str, Any]],
@@ -379,14 +468,24 @@ def build_and_verify_reader(
         out_html = book_dir / f"{slug_id.replace('-', '_').title()}_Interactive_Reader.html"
 
     chapters_config = []
+    dest_audio_dir = book_dir / "audio"
     for item in chapters_meta:
         num = item["num"]
         aligned_path = book_dir / f"{prefix}_ch{num:02d}_aligned_sentences.json"
 
         audio_src = ""
-        if mode == "complete" and audio_dir:
-            audio_candidate = audio_dir / f"chapter_{num:02d}.mp3"
-            if audio_candidate.exists():
+        audio_candidate = None
+        if audio_dir:
+            audio_candidate = discover_audio_track(audio_dir, num, item.get("label", ""))
+            if audio_candidate and audio_candidate.exists():
+                dest_audio_dir.mkdir(parents=True, exist_ok=True)
+                target_audio = dest_audio_dir / audio_candidate.name
+                if not target_audio.exists():
+                    shutil.copy2(audio_candidate, target_audio)
+                audio_src = f"./audio/{audio_candidate.name}"
+        if not audio_src and dest_audio_dir.is_dir():
+            audio_candidate = discover_audio_track(dest_audio_dir, num, item.get("label", ""))
+            if audio_candidate and audio_candidate.exists():
                 audio_src = f"./audio/{audio_candidate.name}"
 
         cfg = {
@@ -547,7 +646,7 @@ def build_reader_pipeline(
     if mode == "text_only":
         synthesize_text_only_aligned_sentences(target_dir, chapters_meta, prefix)
     else:
-        raise NotImplementedError("Complete audio mode integration requires audio tracks in audio_dir")
+        run_audiobook_acoustic_and_alignment(target_dir, chapters_meta, prefix, audio_dir=audio_dir)
 
     out_html = build_and_verify_reader(
         book_dir=target_dir,

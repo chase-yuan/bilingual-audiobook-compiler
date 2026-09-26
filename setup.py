@@ -36,6 +36,16 @@ setup(
     ],
     python_requires=">=3.9",
     install_requires=[],
+    include_package_data=True,
+    package_data={
+        "": [
+            "LINGUISTIC_ANALYSIS_PROMPT.md",
+            "failure_ledger.json",
+            "demo/*",
+            "demo/sample_analysis/*",
+            "fixtures/**/*",
+        ]
+    },
     extras_require={
         "acoustic": ["mlx-whisper"],
         "whisperx": ["whisperx"],
