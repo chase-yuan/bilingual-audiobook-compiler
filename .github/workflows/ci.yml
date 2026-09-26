@@ -1,0 +1,50 @@
+name: Compiler CI
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+      - "fix/**"
+      - "docs/**"
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.11", "3.12"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package
+        run: python -m pip install --upgrade pip && python -m pip install -e .
+
+      - name: Compile Python modules
+        run: python -m py_compile *.py
+
+      - name: Validate tracked JSON contracts
+        run: |
+          python -m json.tool failure_ledger.json >/dev/null
+          python -m json.tool fixtures/phase0/example_ch01_canonical_sentences.json >/dev/null
+          python -m json.tool fixtures/phase0/example_ch01_full_analysis.json >/dev/null
+
+      - name: Run unit test matrix
+        run: python -m unittest discover -v
+
+      - name: Test demo build (zero dependency)
+        run: python universal_runner.py demo/sample.epub --text-only
