@@ -1,66 +1,83 @@
-# Bilingual Audiobook Compiler
+# Bilingual Audiobook Compiler (双语有声书编译器)
 
-A local-first interactive bilingual audiobook compiler and Apple Books-grade reader engine, engineered natively for macOS and Apple Silicon.
+<p align="center">
+  <b>面向 macOS 与 Apple Silicon 原生打造的本地离线交互式双语有声书编译器与 Apple Books 级排版引擎。</b><br>
+  <i>自备 EPUB 原版书与有声书音频，单行命令本地秒级编译；单文件离线 HTML，断网秒开，私密且纯粹。</i>
+</p>
 
-[![Platform](https://img.shields.io/badge/Platform-macOS%2013%2B-0f172a?style=flat-square&logo=apple&logoColor=white)](https://apple.com)
-[![Hardware](https://img.shields.io/badge/Architecture-Apple%20Silicon%20(M1--M4)-334155?style=flat-square)](https://apple.com)
-[![Engine](https://img.shields.io/badge/Acoustics-Apple%20MLX%20Whisper-0284c7?style=flat-square)](https://github.com/ml-explore/mlx)
-[![Zero Dependency](https://img.shields.io/badge/Standard%20Library-Zero%20Runtime%20Deps-10b981?style=flat-square)](https://python.org)
-[![License](https://img.shields.io/badge/License-MIT-64748b?style=flat-square)](LICENSE)
+<p align="center">
+  <a href="README.md"><b>简体中文</b></a> | <a href="README_EN.md">English</a>
+</p>
+
+<p align="center">
+  <a href="https://apple.com"><img src="https://img.shields.io/badge/支持平台-macOS%2013%2B-0f172a?style=flat-square&logo=apple&logoColor=white" alt="Platform"></a>
+  <a href="https://apple.com"><img src="https://img.shields.io/badge/硬件架构-Apple%20Silicon%20(M1--M4)-334155?style=flat-square" alt="Hardware"></a>
+  <a href="https://github.com/ml-explore/mlx"><img src="https://img.shields.io/badge/声学对齐-Apple%20MLX%20Whisper-0284c7?style=flat-square" alt="Acoustics"></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/运行时依赖-Python%20标准库零外部依赖-10b981?style=flat-square" alt="Standard Library"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/开源协议-MIT-64748b?style=flat-square" alt="License"></a>
+</p>
 
 ---
 
-Bring your own EPUB book and audio narration. Compile an offline, self-contained, Apple Books-grade interactive reading application in seconds. Zero servers, zero cloud subscription, zero runtime dependencies.
+## 核心设计理念：为什么做这个工具？
+
+在英语深度阅读与有声原著精读中，学习者长期面临三大妥协：
+1. **排版简陋与视觉噪音**：市面上的双语对照工具往往将译文生硬地插在段落间，割裂英语心流，缺乏呼吸感与字体层级；
+2. **网站依赖与隐私顾虑**：多数点读产品要求用户将私藏书籍和音频上传至云端服务器，受制于网络延迟、会员订阅与服务下线风险；
+3. **音频与文本严重脱节**：传统有声书播放器只能按“章节”粗粒度跳转，无法做到“听到哪个词、哪个词实时高亮”，更无法在遇到难句时即点即译。
+
+**Bilingual Audiobook Compiler 的解法是：回归本地与极简。**  
+通过 Apple Silicon 统一内存运行 MLX 神经对齐，将任意 EPUB 与音频在本地极速编译为单一纯静态 `.html` 文件。无需安装数据库，无需启动本地 Web 服务器，双击即可在 Safari 中享受顶级 Apple Books 质感的沉浸式精读体验。
 
 > [!NOTE]
-> The compiled reader is a standalone, single-file HTML document. Open it directly in Safari on Mac, iPad, or iPhone. Works 100% offline with zero external network requests.
+> 编译产物为完全自包含的单文件 HTML。支持通过 AirDrop 直接发送至 iPhone / iPad 上的 Safari 离线阅读，无任何外部网络请求与追踪代码。
 
 ---
 
-## Interactive Experience
+## 交互体验与视觉规格
 
-![Interactive Bilingual Reader Demo](docs/images/demo_interactive_flow.gif)
+![交互式双语阅读器演示](docs/images/demo_interactive_flow.gif)
 
-- **Acoustic Tracking**: Real-time word highlighting locked to studio audiobook narration with sub-millisecond precision.
-- **Contextual Nuance Cards**: Click any sentence for idiomatic translations, CEFR C1/C2 vocabulary breakdowns, and phonetic IPA annotations.
-- **Apple Books Typography**: San Francisco and New York serif type stacks, 44 px touch targets, and instant Light, Sepia, and OLED Dark mode switching.
+- **毫秒级单词声学高亮 (Acoustic Tracking)**：文字高亮与专业录音室原声朗读严密同步，告别音频与视觉漂移。
+- **语境级词汇与难句浮层 (Nuance Cards)**：点击任意句子即刻展开地道译文、CEFR C1/C2 高阶生词剖析、国际音标 (IPA) 及词性说明。
+- **Apple Books 级系统美学**：原生集成 San Francisco 与 New York 衬线字体族，严格遵循 44px 苹果人机交互触控标准，提供纯白（Light）、暖黄羊皮纸（Sepia）与 OLED 纯黑（Dark）三种主题无缝切换。
 
 ---
 
-## Performance on Apple Silicon
+## Apple Silicon 硬件加速性能矩阵
 
-The core text extraction and HTML compilation pipeline runs entirely on native Python 3 standard library modules. Speech-to-text forced alignment executes via Apple's official `mlx-whisper`, utilizing the unified memory architecture, GPU, and Neural Engine without CUDA or cloud API billing.
+文本解析与单文件 HTML 编译核心完全基于 Python 3 原生标准库，无需任何外部三方包。声学对齐直接调用 Apple 官方 `mlx-whisper`，全面调度 Mac 统一内存架构、GPU 与神经网络引擎 (Neural Engine)，彻底告别庞大的 CUDA 运行库与高昂的云端 API 计费。
 
-| Hardware Target | Audio Duration | Alignment Time | Throughput | Cloud API Cost |
+| 运行平台 | 音频时长 | 本地对齐耗时 | 处理吞吐效率 | 云端 API 费用 |
 | :--- | :---: | :---: | :---: | :---: |
-| **Apple M4 / M3 Max (Unified Memory)** | 1 Hour (Studio Audio) | **~2.2 min** | **~27x Real-time** | **$0.00 (Offline)** |
-| **Apple M3 / M2 Pro** | 1 Hour (Studio Audio) | **~3.5 min** | **~17x Real-time** | **$0.00 (Offline)** |
-| **Apple M1 / M2 Air** | 1 Hour (Studio Audio) | **~4.8 min** | **~12x Real-time** | **$0.00 (Offline)** |
-| Cloud GPU / REST ASR API | 1 Hour (Studio Audio) | ~6–10 min + Latency | ~7x Real-time | $0.36 – $1.20 / Title |
+| **Apple M4 / M3 Max (统一内存架构)** | 1 小时专业录音 | **~2.2 分钟** | **~27 倍速实时** | **$0.00 (完全离线)** |
+| **Apple M3 / M2 Pro** | 1 小时专业录音 | **~3.5 分钟** | **~17 倍速实时** | **$0.00 (完全离线)** |
+| **Apple M1 / M2 Air** | 1 小时专业录音 | **~4.8 分钟** | **~12 倍速实时** | **$0.00 (完全离线)** |
+| 云端 GPU / REST ASR API 方案 | 1 小时专业录音 | ~6–10 分钟 + 网络延迟 | ~7 倍速实时 | $0.36 – $1.20 / 本 |
 
 ---
 
-## Compilation Topology
+## 编译系统拓扑架构
 
 ```mermaid
 flowchart TD
-    subgraph "Input Ingestion"
-        A["Source EPUB Book<br>(.epub)"]
-        B["Studio Audiobook Tracks<br>(.mp3 / .m4a)"]
+    subgraph "输入源层 (Input Ingestion)"
+        A["自备 EPUB 原版书<br>(.epub)"]
+        B["自备有声书音频<br>(.mp3 / .m4a)"]
     end
 
-    subgraph "Local-First Compiler"
-        A --> C["EPUB Boundary Extractor<br>(extract_epub.py)"]
-        B --> D["Apple MLX Whisper Engine<br>(acoustic_whisper.py)"]
-        C --> E["Dynamic Acoustic Aligner<br>(dynamic_aligner.py)"]
+    subgraph "本地编译器流水线 (Compiler Core)"
+        A --> C["EPUB 句子边界提取器<br>(extract_epub.py)"]
+        B --> D["Apple MLX Whisper 引擎<br>(acoustic_whisper.py)"]
+        C --> E["动态时间规整声学对齐器<br>(dynamic_aligner.py)"]
         D --> E
-        E --> F["Linguistic & Nuance Analyzer<br>(content_profile.py)"]
-        F --> G["Cryptographic Quality Gate<br>(quality_gate.py)"]
+        E --> F["语言学与语境难词分析器<br>(content_profile.py)"]
+        F --> G["密码学质量放行门禁<br>(quality_gate.py)"]
     end
 
-    subgraph "Offline Deliverable"
-        G --> H["Standalone Interactive Reader<br>(Single Self-Contained .html)"]
-        H --> I["Safari / Mobile Safari<br>(Zero Runtime Dependency)"]
+    subgraph "离线交付成果 (Deliverable)"
+        G --> H["自包含交互式点读书<br>(单一独立 .html 文件)"]
+        H --> I["桌面与移动端 Safari<br>(零外部运行时依赖)"]
     end
 
     style A fill:#ffffff,stroke:#cbd5e1,stroke-width:1px,color:#0f172a
@@ -76,62 +93,62 @@ flowchart TD
 
 ---
 
-## Quickstart
+## 30 秒极速上手
 
-Build the included public-domain monograph (*Sun Tzu's The Art of War*) in 5 seconds using standard library Python:
+仓库已内置 5KB 极简公共版权示范书籍（《孙子兵法》英译版），5 秒内即可完成完整编译验证：
 
 ```bash
-# 1. Clone the compiler repository
+# 1. 克隆编译器仓库
 git clone https://github.com/chase-yuan/bilingual-audiobook-compiler.git
 cd bilingual-audiobook-compiler
 
-# 2. Compile demo book (Zero external dependencies needed)
+# 2. 编译示范书籍（纯标准库运行，零额外依赖）
 python3 universal_runner.py demo/sample.epub --text-only
 ```
 
-Safari will automatically launch with the compiled interactive bilingual book.
+编译完成后系统将自动唤起 Safari，呈现生成的单文件交互式双语书。
 
 ---
 
-## Dual Compilation Modes
+## 双模式编译指南
 
-### 1. Pure Text Reader (`--text-only`)
-For volumes without audiobook recordings. Compiles complete chapter-by-chapter bilingual readers with sentence click-to-translate, vocabulary popups, and keyboard navigation.
+### 模式 1：纯文本双语精读器 (`--text-only`)
+适用于仅有电子书、暂无音频的场景。极速生成包含逐句点击翻译、语法词汇释义浮层与全键盘快捷键的单文件精排电子书：
 
 ```bash
-# Basic run with auto-detected output directory
+# 基础运行（自动识别输出目录）：
 python3 universal_runner.py /path/to/book.epub --text-only
 
-# High-throughput parallel translation (8 workers)
+# 多核并行加速翻译（如 8 进程）：
 python3 universal_runner.py /path/to/book.epub --text-only --concurrency 8 --book-dir ./my_book
 ```
 
-### 2. Synchronized Audiobook Reader (`complete`)
-Combines EPUB text with professional narrator audio tracks (`.mp3` or `.m4a`), executing word-by-word forced alignment via Apple Silicon MLX Whisper.
+### 模式 2：沉浸式有声对齐点读书 (`complete`)
+将 EPUB 文本与专业朗读音频（`.mp3` 或 `.m4a`）结合，通过 Apple Silicon 运行逐词级毫秒强制对齐：
 
 ```bash
-# Install Apple Silicon MLX acoustic support
+# 安装 Apple Silicon 原生 MLX 声学支持：
 pip install -e '.[acoustic]'
 
-# Compile full interactive audiobook
+# 编译完整有声点读书：
 python3 universal_runner.py --epub /path/to/book.epub --audio-dir /path/to/audio --book-dir ./my_book
 ```
 
 ---
 
-## CLI Installation
+## CLI 全局安装
 
-Install into your local Python environment to use the `bilingual-compiler` command from any directory:
+支持安装到本地 Python 环境，在 Mac 任意目录下通过 `bilingual-compiler` 命令快速编译：
 
 ```bash
-# Standard installation (Text-only compiler)
+# 基础安装（纯文本编译模式）
 pip install -e .
 
-# Full installation (Apple Silicon MLX acoustic support)
+# 完整安装（启用 Apple Silicon MLX 神经对齐）
 pip install -e '.[acoustic]'
 ```
 
-Once installed:
+安装后即可直接执行：
 
 ```bash
 bilingual-compiler /path/to/book.epub --text-only
@@ -139,9 +156,9 @@ bilingual-compiler /path/to/book.epub --text-only
 
 ---
 
-## Directory Organization
+## 资源目录组织契约
 
-Prepare your source volume and narration files:
+准备自备的书籍与音频目录结构：
 
 ```text
 my_book/
@@ -152,27 +169,37 @@ my_book/
     02_chapter2.mp3
 ```
 
-Tracks are automatically paired with EPUB chapters by numerical prefix or spine ID, ensuring monotonic audio-text alignment.
+流水线会自动解析章节前缀与 EPUB 内部 Spine 结构并进行双向绑定，确保整本书音频与文字的严格单调递增，杜绝章节错配。
 
 ---
 
-## Repository Structure
+## 质量验证体系
 
-- `universal_runner.py`: Primary CLI entrypoint (`bilingual-compiler`)
-- `extract_epub.py`: Clean EPUB sentence boundary extractor
-- `dynamic_aligner.py`: High-precision word-level acoustic aligner
-- `html_builder.py`: Apple Books standalone HTML compiler
-- `content_profile.py`: Mode router (`text_only` vs `complete` audio)
-- `quality_gate.py`: Cryptographic release gate and smoke tester
-- `validate_outputs.py`: Invariant validator for compilation
-- `acoustic_whisper.py`: Apple Silicon MLX Whisper extractor
-- `demo/sample.epub`: Public-domain demo EPUB
-- `docs/images/`: Visual assets and flow demonstrations
-- `setup.py`: Package configuration and entrypoints
-- `LICENSE`: MIT License
+运行包含 121 项断言的完整单元测试矩阵（覆盖边界提取、时间对齐、Token 渲染与打包契约）：
+
+```bash
+python3 -m unittest discover
+```
 
 ---
 
-## License
+## 模块清单与职责
 
-This project is licensed under the [MIT License](LICENSE).
+- `universal_runner.py`：主编译器 CLI 入口 (`bilingual-compiler`)
+- `extract_epub.py`：EPUB 句子级纯净边界提取器
+- `dynamic_aligner.py`：高精度动态时间规整声学对齐引擎
+- `html_builder.py`：Apple Books 级单文件静态 HTML 编译器
+- `content_profile.py`：工作模式分发器 (`text_only` vs `complete`)
+- `quality_gate.py`：密码学完整性 release 门禁与烟雾测试
+- `validate_outputs.py`：交付产物不变式合规校验器
+- `acoustic_whisper.py`：Apple Silicon MLX Whisper 单词级特征提取器
+- `demo/sample.epub`：5KB 公版示范 EPUB
+- `docs/images/`：交互流程实机 GIF 与视觉资源
+- `setup.py`：Python 包配置与全局命令安装契约
+- `LICENSE`：MIT 开源协议
+
+---
+
+## 开源协议
+
+本项目基于 [MIT License](LICENSE) 协议完全开源。
