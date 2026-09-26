@@ -9,8 +9,11 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import subprocess
 import time
+import urllib.error
+import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -145,8 +148,89 @@ def verify_analysis(data: Any, canonical_data: list[dict]) -> None:
                 raise RuntimeError(f"malformed vocabulary item in record {item_id}")
 
 
+def _call_openai_api(prompt: str, timeout: int) -> str:
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+    model = os.getenv("READER_LLM_MODEL") or os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+
+    url = f"{base_url}/chat/completions"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+    }
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        res_data = json.loads(resp.read().decode("utf-8"))
+        return res_data["choices"][0]["message"]["content"]
+
+
+def _execute_llm_query(
+    prompt: str,
+    cwd: Path,
+    attempt: int,
+    timeout: int,
+    fallback_models: list[str],
+) -> str:
+    has_agy = bool(shutil.which("agy"))
+    has_openai = bool(os.getenv("OPENAI_API_KEY"))
+
+    if not has_agy and not has_openai:
+        raise RuntimeError(
+            "No LLM backend available for linguistic analysis.\n"
+            "Neither 'agy' CLI was found in PATH, nor 'OPENAI_API_KEY' is configured.\n"
+            "To analyze custom books, provide one of the following:\n"
+            "  1. Standard API: export OPENAI_API_KEY='sk-...'\n"
+            "     (Optional: export OPENAI_BASE_URL='https://api.deepseek.com/v1')\n"
+            "  2. Or install/add 'agy' CLI to your PATH.\n"
+            "Note: The bundled sample book ('demo/sample.epub') includes pre-analyzed fixtures and runs zero-dependency out of the box."
+        )
+
+    if has_agy:
+        model_name = fallback_models[(attempt - 1) % len(fallback_models)]
+        base_cmd = ["agy"]
+        if model_name:
+            base_cmd.extend(["--model", model_name])
+        completed = subprocess.run(
+            base_cmd + ["--output-format", "text", "--print-timeout", "1h", "--print", prompt],
+            cwd=str(cwd),
+            text=True,
+            capture_output=True,
+            timeout=timeout,
+        )
+        if completed.returncode != 0:
+            err = (completed.stderr or completed.stdout or "agy failed")[-4000:]
+            raise RuntimeError(f"agy execution failed: {err}")
+        return completed.stdout
+    else:
+        return _call_openai_api(prompt, timeout=timeout)
+
+
 def _process_single_batch(batch_idx: int, batch: list[dict], base_prompt: str, total_batches: int,
                           cwd: Path, timeout: int, max_batch_attempts: int) -> list[dict]:
+    if os.getenv("READER_MOCK_LLM") == "1":
+        return [
+            {
+                "id": item["id"],
+                "elem_idx": item.get("elem_idx", 0),
+                "tag": item.get("tag", "p"),
+                "text": item["text"],
+                "trans": f"【译文】{item['text']}",
+                "vocab": [],
+                "is_heading": item.get("is_heading", False),
+            }
+            for item in batch
+        ]
+
     prompt = build_batch_prompt(base_prompt, batch, batch_idx, total_batches)
     last_error = ""
 
@@ -157,29 +241,11 @@ def _process_single_batch(batch_idx: int, batch: list[dict], base_prompt: str, t
             fallback_models.append(alt)
 
     for attempt in range(1, max_batch_attempts + 1):
-        model_name = fallback_models[(attempt - 1) % len(fallback_models)]
-        base_cmd = ["agy"]
-        if model_name:
-            base_cmd.extend(["--model", model_name])
-
         try:
-            completed = subprocess.run(
-                base_cmd + ["--output-format", "text", "--print-timeout", "1h", "--print", prompt],
-                cwd=str(cwd),
-                text=True,
-                capture_output=True,
-                timeout=timeout,
-            )
-            if completed.returncode != 0:
-                last_error = (completed.stderr or completed.stdout or "agy failed")[-4000:]
-                is_quota = "RESOURCE_EXHAUSTED" in last_error or "429" in last_error
-                wait_sec = 10 if is_quota else min(2 * attempt, 10)
-                time.sleep(wait_sec)
-                continue
-
-            batch_result = _json_from_output(completed.stdout)
+            raw_stdout = _execute_llm_query(prompt, cwd, attempt, timeout, fallback_models)
+            batch_result = _json_from_output(raw_stdout)
             if not isinstance(batch_result, list):
-                last_error = "agy output must be a JSON list"
+                last_error = "LLM output must be a JSON list"
                 time.sleep(1)
                 continue
 
@@ -194,26 +260,19 @@ def _process_single_batch(batch_idx: int, batch: list[dict], base_prompt: str, t
             if missing_items and len(missing_items) <= 10:
                 sub_prompt = build_batch_prompt(base_prompt, missing_items, 0, 1)
                 try:
-                    sub_completed = subprocess.run(
-                        base_cmd + ["--output-format", "text", "--print-timeout", "1h", "--print", sub_prompt],
-                        cwd=str(cwd),
-                        text=True,
-                        capture_output=True,
-                        timeout=timeout,
-                    )
-                    if sub_completed.returncode == 0:
-                        sub_result = _json_from_output(sub_completed.stdout)
-                        if isinstance(sub_result, list):
-                            for s_item in sub_result:
-                                if isinstance(s_item, dict) and "id" in s_item:
-                                    returned_map[s_item["id"]] = s_item
+                    sub_raw = _execute_llm_query(sub_prompt, cwd, attempt, timeout, fallback_models)
+                    sub_result = _json_from_output(sub_raw)
+                    if isinstance(sub_result, list):
+                        for s_item in sub_result:
+                            if isinstance(s_item, dict) and "id" in s_item:
+                                returned_map[s_item["id"]] = s_item
                 except Exception:
                     pass
                 missing_items = [item for item in batch if item["id"] not in returned_map]
 
             if missing_items:
                 last_error = (
-                    f"agy returned {len(returned_map)} items, expected {len(batch)}; "
+                    f"LLM returned {len(returned_map)} items, expected {len(batch)}; "
                     f"missed {len(missing_items)} items: {[m['id'] for m in missing_items]}"
                 )
                 time.sleep(1)
@@ -224,10 +283,12 @@ def _process_single_batch(batch_idx: int, batch: list[dict], base_prompt: str, t
             return ordered_batch
         except (subprocess.TimeoutExpired, json.JSONDecodeError, RuntimeError) as exc:
             last_error = str(exc)
-            time.sleep(1)
+            is_quota = "RESOURCE_EXHAUSTED" in last_error or "429" in last_error
+            wait_sec = 10 if is_quota else min(2 * attempt, 10)
+            time.sleep(wait_sec)
 
     raise RuntimeError(
-        f"agy failed on batch {batch_idx + 1}/{total_batches} after {max_batch_attempts} attempts: {last_error}"
+        f"Linguistic analysis failed on batch {batch_idx + 1}/{total_batches} after {max_batch_attempts} attempts: {last_error}"
     )
 
 

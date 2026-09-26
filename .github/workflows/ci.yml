@@ -42,9 +42,12 @@ jobs:
           python -m json.tool failure_ledger.json >/dev/null
           python -m json.tool fixtures/phase0/example_ch01_canonical_sentences.json >/dev/null
           python -m json.tool fixtures/phase0/example_ch01_full_analysis.json >/dev/null
+          python -m json.tool demo/sample_analysis/the_art_of_war_classic_bilingual_edition_ch00_full_analysis.json >/dev/null
+          python -m json.tool demo/sample_analysis/the_art_of_war_classic_bilingual_edition_ch01_full_analysis.json >/dev/null
+          python -m json.tool demo/sample_analysis/the_art_of_war_classic_bilingual_edition_ch02_full_analysis.json >/dev/null
 
       - name: Run unit test matrix
         run: python -m unittest discover -v
 
       - name: Test demo build (zero dependency)
-        run: python universal_runner.py demo/sample.epub --text-only
+        run: python universal_runner.py demo/sample.epub --text-only --no-browser

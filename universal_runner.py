@@ -25,6 +25,7 @@ import subprocess
 import sys
 import time
 import zipfile
+import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -250,6 +251,13 @@ def process_linguistics_track(
     if is_analysis_valid(ana_path, can_path):
         return True
 
+    # 1. Check for bundled pre-analyzed demo data (e.g. demo/sample.epub)
+    bundled_demo_ana = PIPELINE_DIR / "demo" / "sample_analysis" / f"{prefix}_ch{num:02d}_full_analysis.json"
+    if bundled_demo_ana.is_file() and is_analysis_valid(bundled_demo_ana, can_path):
+        shutil.copy2(bundled_demo_ana, ana_path)
+        print(f"[Linguistic] Using bundled sample analysis for track {num:02d} -> {ana_path.name}", flush=True)
+        return True
+
     if not can_path.is_file():
         print(f"[Linguistic ERROR] Track {num:02d} missing canonical: {can_path}", file=sys.stderr)
         return False
@@ -451,7 +459,11 @@ def build_reader_pipeline(
 
     # Set up book directory
     if book_dir is None:
-        target_dir = Path.home() / "Vault" / "audiobook" / title
+        vault_audiobook = Path.home() / "Vault" / "audiobook"
+        if vault_audiobook.is_dir():
+            target_dir = vault_audiobook / title
+        else:
+            target_dir = Path.cwd() / "output" / sanitize_slug(title)
     else:
         target_dir = book_dir.expanduser().resolve()
 

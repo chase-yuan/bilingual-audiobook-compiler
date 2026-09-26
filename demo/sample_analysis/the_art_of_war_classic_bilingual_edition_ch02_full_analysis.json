@@ -1,0 +1,87 @@
+[
+  {
+    "id": "s-0",
+    "text": "Chapter 2: Waging War",
+    "trans": "第二篇：作战",
+    "vocab": [
+      {
+        "word": "wage war",
+        "pos": "colloc.",
+        "def": "发动战争，开展战事"
+      }
+    ]
+  },
+  {
+    "id": "s-1",
+    "text": "In the operations of war, where there are in the field a thousand swift chariots, as many heavy chariots, and a hundred thousand mail-clad soldiers, with provisions enough to carry them a thousand li, the expenditure at home and at the front will reach the total of a thousand ounces of silver per day.",
+    "trans": "凡用兵打仗，若出动轻车千辆、重车千乘、披甲精卒十万，并运载足供远征千里的粮饷物资，则后方筹措与前线开销每日将耗费白银千两。",
+    "vocab": [
+      {
+        "word": "in the field",
+        "pos": "idiom",
+        "def": "在战场上，在作战前线"
+      },
+      {
+        "word": "mail-clad",
+        "pos": "adj.",
+        "def": "身披重甲的，披挂铠甲的（mail 特指锁子甲或金属甲胄）"
+      },
+      {
+        "word": "carry",
+        "pos": "v.",
+        "def": "（粮草给养）维系……走完全程，支撑……行军（熟词生义）"
+      }
+    ]
+  },
+  {
+    "id": "s-2",
+    "text": "Such is the cost of raising an army of 100,000 men.",
+    "trans": "这便是兴兵十万出征所需付出的庞大代价。",
+    "vocab": [
+      {
+        "word": "raise an army",
+        "pos": "colloc.",
+        "def": "组建/招募军队，兴兵起兵"
+      }
+    ]
+  },
+  {
+    "id": "s-3",
+    "text": "When you engage in actual fighting, if victory is long in coming, then men's weapons will grow dull and their ardor will be damped.",
+    "trans": "交锋作战之时，倘若胜利迟迟不至，将士们的兵刃便会日渐磨钝，昂扬的斗志也会被挫伤消磨。",
+    "vocab": [
+      {
+        "word": "long in coming",
+        "pos": "idiom",
+        "def": "迟迟不至，久未实现，姗姗来迟"
+      },
+      {
+        "word": "ardor",
+        "pos": "n.",
+        "def": "（将士昂扬的）斗志，热情，士气"
+      },
+      {
+        "word": "damp",
+        "pos": "v.",
+        "def": "挫伤，削弱，浇灭（士气或热情）"
+      }
+    ]
+  },
+  {
+    "id": "s-4",
+    "text": "Now in order to kill the enemy, our men must be roused to anger; that there may be advantage from defeating the enemy, they must have their rewards.",
+    "trans": "要想驱策将士勇于杀敌，必须激发起他们同仇敌忾的怒火；要想使击溃敌军转化为切实战果，就必须对他们论功行赏。",
+    "vocab": [
+      {
+        "word": "rouse to anger",
+        "pos": "colloc.",
+        "def": "激起怒火，唤起同仇敌忾之意"
+      },
+      {
+        "word": "advantage",
+        "pos": "n.",
+        "def": "实利，战利与战果（熟词生义，指克敌制胜所获得的实际物资与战术利益）"
+      }
+    ]
+  }
+]

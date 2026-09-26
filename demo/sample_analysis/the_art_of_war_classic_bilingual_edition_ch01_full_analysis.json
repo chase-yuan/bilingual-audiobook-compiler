@@ -1,0 +1,167 @@
+[
+  {
+    "id": "s-0",
+    "text": "Chapter 1: Laying Plans",
+    "trans": "第一章：筹划定策（始计篇）",
+    "vocab": [
+      {
+        "word": "lay plans",
+        "pos": "colloc.",
+        "def": "运筹谋划，定立计策；lay 在此表示“拟定、设定（计划或方略）”。"
+      }
+    ]
+  },
+  {
+    "id": "s-1",
+    "text": "The art of war is of vital importance to the State.",
+    "trans": "兵者，国之大事——军事战争关乎政权社稷的生死存亡。",
+    "vocab": [
+      {
+        "word": "of vital importance",
+        "pos": "colloc.",
+        "def": "极其重要，关乎存亡；“be of + 抽象名词”结构表示具备某种性质，vital 强调生死攸关、不可或缺。"
+      },
+      {
+        "word": "the State",
+        "pos": "n.",
+        "def": "国家，政权；首字母大写特指政治共同体整体，在战略语境中指关乎国家政权与社稷存续。"
+      }
+    ]
+  },
+  {
+    "id": "s-2",
+    "text": "It is a matter of life and death, a road either to safety or to ruin.",
+    "trans": "它关乎生死存亡，是决定国家走向安全稳固还是覆灭溃败的必由之路。",
+    "vocab": [
+      {
+        "word": "a matter of life and death",
+        "pos": "idiom",
+        "def": "生死攸关的大事，决定存亡绝续的关键。"
+      },
+      {
+        "word": "ruin",
+        "pos": "n.",
+        "def": "毁灭，覆亡；特指国家体制、军队力量或政权的彻底灭亡与破产。"
+      }
+    ]
+  },
+  {
+    "id": "s-3",
+    "text": "Hence it is a subject of inquiry which can on no account be neglected.",
+    "trans": "因此，这是一门绝不容忽视、必须深入审察探究的重大课题。",
+    "vocab": [
+      {
+        "word": "subject of inquiry",
+        "pos": "colloc.",
+        "def": "深入探究与审察的课题/对象；对应兵法中的“不可不察”，强调战略层面的周密考辨。"
+      },
+      {
+        "word": "on no account",
+        "pos": "idiom",
+        "def": "决不，切不可；强语气否定习语，表达毫无商量余地的绝对戒律。"
+      }
+    ]
+  },
+  {
+    "id": "s-4",
+    "text": "The art of war, then, is governed by five constant factors, to be taken into account in one's deliberations, when seeking to determine the conditions obtaining in the field.",
+    "trans": "由此可知，用兵作战受制于五大根本法则；在筹谋决策以研判战场的实际态势时，必须将这些要素悉数纳入考量。",
+    "vocab": [
+      {
+        "word": "take into account",
+        "pos": "idiom",
+        "def": "将……纳入考量，在谋划权衡时加以顾及。"
+      },
+      {
+        "word": "deliberation",
+        "pos": "n.",
+        "def": "深思熟虑，战略运筹；特指领导者或参谋团队对全局策略的缜密推演与商议。"
+      },
+      {
+        "word": "obtain",
+        "pos": "v.",
+        "def": "【熟词生义】（状况、规则等）存在，通行；作不及物动词，conditions obtaining 指客观现存的、处于支配地位的实际状况。"
+      }
+    ]
+  },
+  {
+    "id": "s-5",
+    "text": "These are: The Moral Law; Heaven; Earth; The Commander; Method and discipline.",
+    "trans": "此五者为：道义法令（道）、天时气象（天）、地理险阻（地）、将帅才略（将）、军纪制度（法）。",
+    "vocab": [
+      {
+        "word": "The Moral Law",
+        "pos": "n.",
+        "def": "道义法则，政治向心力；译者在此对应《孙子兵法》中的“道”，即令上下同欲、民众愿与君上同生共死的道义纽带。"
+      },
+      {
+        "word": "discipline",
+        "pos": "n.",
+        "def": "治军法度，军纪；特指编制调配、官吏权责与物资粮饷的管理制度（对应“法”）。"
+      }
+    ]
+  },
+  {
+    "id": "s-6",
+    "text": "All warfare is based on deception.",
+    "trans": "兵者，诡道也——一切用兵作战的本质皆在于奇谋欺敌。",
+    "vocab": [
+      {
+        "word": "deception",
+        "pos": "n.",
+        "def": "诡诈，虚实伪装；军事语境中特指隐真示假、使敌误判的策略与战术艺术（对应“诡道”）。"
+      }
+    ]
+  },
+  {
+    "id": "s-7",
+    "text": "Hence, when able to attack, we must seem unable; when using our forces, we must seem inactive; when we are near, we must make the enemy believe we are far away; when far away, we must make him believe we are near.",
+    "trans": "因而，我军能战却要示敌以不能战，意图用兵却要示敌以按兵不动；我方逼近眼前却要使敌军误以为尚在远方，身处远方却要使敌军误以为迫在眉睫。",
+    "vocab": [
+      {
+        "word": "forces",
+        "pos": "n.",
+        "def": "军队，兵力；force 的复数专指具备作战能力的武装部队编制。"
+      },
+      {
+        "word": "inactive",
+        "pos": "adj.",
+        "def": "按兵不动的，休战静止的；军事行动中形容故意收敛兵力、不现战意的状态（对应“示之不用”）。"
+      }
+    ]
+  },
+  {
+    "id": "s-8",
+    "text": "Hold out baits to entice the enemy.",
+    "trans": "利而诱之——抛出诱饵以引诱敌军上钩。",
+    "vocab": [
+      {
+        "word": "hold out",
+        "pos": "phr. v.",
+        "def": "出示，抛出（诱饵、希望等）；指故意向对方展现利益或便宜以吸引其靠近。"
+      },
+      {
+        "word": "entice",
+        "pos": "v.",
+        "def": "诱使，引诱；以有利可图的假象促使敌方脱离防线或犯错（对应“利而诱之”）。"
+      }
+    ]
+  },
+  {
+    "id": "s-9",
+    "text": "Feign disorder, and crush him.",
+    "trans": "乱而取之——伪装溃乱以诱敌，继而一举将其彻底击溃。",
+    "vocab": [
+      {
+        "word": "feign",
+        "pos": "v.",
+        "def": "假装，佯装；特指有意制造某种混乱或虚弱的表象以蒙蔽对手（对应“佯乱”）。"
+      },
+      {
+        "word": "crush",
+        "pos": "v.",
+        "def": "彻底击溃，碾压消灭；比喻性强调运用压倒性战力对敌实施歼灭性打击。"
+      }
+    ]
+  }
+]

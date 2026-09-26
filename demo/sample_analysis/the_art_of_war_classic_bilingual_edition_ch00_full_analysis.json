@@ -1,0 +1,81 @@
+[
+  {
+    "id": "s-0",
+    "text": "Preface",
+    "trans": "序言",
+    "vocab": []
+  },
+  {
+    "id": "s-1",
+    "text": "The Art of War is an ancient Chinese military treatise dating from the Late Spring and Autumn Period.",
+    "trans": "《孙子兵法》是一部成书于春秋末期的中国古代军事论著。",
+    "vocab": [
+      {
+        "word": "treatise",
+        "pos": "n.",
+        "def": "（系统阐述某一专题的）专著、论著"
+      },
+      {
+        "word": "date from",
+        "pos": "phr. v.",
+        "def": "追溯至，始于（某一历史时期）"
+      }
+    ]
+  },
+  {
+    "id": "s-2",
+    "text": "The work, which is attributed to the ancient Chinese military strategist Sun Tzu, is composed of 13 chapters.",
+    "trans": "该书相传为中国古代军事家孙武所作，全书共分十三章。",
+    "vocab": [
+      {
+        "word": "be attributed to",
+        "pos": "colloc.",
+        "def": "相传出自……之手，被归为……所作"
+      },
+      {
+        "word": "strategist",
+        "pos": "n.",
+        "def": "战略家，军事谋略家"
+      }
+    ]
+  },
+  {
+    "id": "s-3",
+    "text": "Each chapter is devoted to an aspect of warfare and how it applies to military strategy and tactics.",
+    "trans": "书中每一章均专门论述战争的一个侧面，并剖析其如何运用于军事战略与具体战术之中。",
+    "vocab": [
+      {
+        "word": "be devoted to",
+        "pos": "colloc.",
+        "def": "专门论述，专注于（某一特定议题）"
+      },
+      {
+        "word": "tactics",
+        "pos": "n.",
+        "def": "战术，具体的兵法运用（与宏观 strategy 形成层级对照）"
+      }
+    ]
+  },
+  {
+    "id": "s-4",
+    "text": "For almost 1,500 years it was the lead text in an anthology that was formalized as the Seven Military Classics by Emperor Shenzong of Song in 1080.",
+    "trans": "在近一千五百年的岁月里，它始终是一部军事总集中的开篇首典；公元1080年，宋神宗正式将该选集敕定为《武经七书》。",
+    "vocab": [
+      {
+        "word": "lead text",
+        "pos": "colloc.",
+        "def": "卷首典籍，领衔篇目"
+      },
+      {
+        "word": "anthology",
+        "pos": "n.",
+        "def": "选集，文献汇编"
+      },
+      {
+        "word": "formalize",
+        "pos": "v.",
+        "def": "使正式化；（官方）敕定，确立制度地位"
+      }
+    ]
+  }
+]
